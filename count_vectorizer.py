@@ -14,6 +14,7 @@ Separates the posts contained in the provided file by year and then returns a li
 
 def get_counts_and_metrics(dir):
     data = []
+    list_values = []
     for filename in os.listdir(dir):
         print(filename)
         df = pd.read_csv(dir + filename, header=0)
@@ -24,35 +25,23 @@ def get_counts_and_metrics(dir):
         for date, pro in zip(years, pros):
             corpus[date] += pro + ' '
 
+        keys = sorted(corpus)
 
         company_name = filename.split('.')[0]
-
+        metric_years = []
         metricsFile = pd.read_csv('metrics.csv')
-        rowNum = 0
-        for name in metricsFile['Company Name']:
-            if name == company_name:
-                data.append(metricsFile['Gross Profit (Loss)'][rowNum])
-            rowNum += 1
+        for row in metricsFile.index:
+            #print(metricsFile['Data Year - Fiscal'][row])
+            if metricsFile['Company Name'][row] == company_name and str(int(metricsFile['Data Year - Fiscal'][row])) in keys:
+                metric_years.append(str(int(metricsFile['Data Year - Fiscal'][row])))
+                #print(str(int(metricsFile['Data Year - Fiscal'][row])))
+                data.append(metricsFile['Gross Profit (Loss)'][row])
+        for key in keys:
+            if key in metric_years:
+                list_values.append(corpus[key])
 
-
-    print(corpus)
-    keys = sorted(corpus)
-    list_values = []
-    for key in keys:
-        list_values.append(corpus[key])
-    print(list_values)
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
     counts = vectorizer.fit_transform(list_values)
-
-    # #metrics
-    # company_name = filename.split('.')[0]
-    #
-    # metricsFile = pd.read_csv('metrics.csv')
-    # rowNum = 0
-    # for name in metricsFile['Company Name']:
-    #     if name == company_name:
-    #         data.append(metricsFile['Gross Profit (Loss)'][rowNum])
-    #     rowNum += 1
     return counts, data
 
 
