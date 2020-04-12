@@ -77,5 +77,8 @@ def RandomForestModel(X, y):
 
 
 counts = get_counts_and_metrics('C:/Users/Chaitu Konjeti/Glassdoor/REVIEWS/')
-
+y = extract_metrics('AMERICAN AIRLINES GROUP INC', 'metrics.csv')
+counts, y = np.asarray(counts), np.asarray(y)
+print(counts.shape)
+print(y.shape)
 RandomForestModel(counts, y)
