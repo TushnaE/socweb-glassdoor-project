@@ -13,35 +13,48 @@ Separates the posts contained in the provided file by year and then returns a li
 
 
 def get_counts_and_metrics(dir):
+    data = []
     for filename in os.listdir(dir):
         print(filename)
-        corpus = {}
-        with open('REVIEWS/' + filename) as f:
-            csv_reader = csv.reader(f, delimiter=',')
-            count = 0
-            for row in csv_reader:
-                if count == 0:
-                    count += 1
-                    continue
-                else:
-                    try:
-                        year = row[0].split(' ')[3]
-                        if year not in corpus.keys():
-                            string = ''
-                            string += row[7]
-                            corpus[year] = string + ' '
-                        else:
-                            corpus[year] += row[7] + ' '
-                        count += 1
-                    except:
-                        count += 1
-        keys = sorted(corpus)
-        list_values = []
-        for key in keys:
-            list_values.append(corpus[key])
-        vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
-        counts = vectorizer.fit_transform(list_values).toarray()
-        return counts
+        df = pd.read_csv(dir + filename, header=0)
+        dates = df['date']
+        pros = df['pros']
+        years = [date.split(' ')[3] for date in dates]
+        corpus = {key: '' for key in set(years)}
+        for date, pro in zip(years, pros):
+            corpus[date] += pro + ' '
+
+
+        company_name = filename.split('.')[0]
+
+        metricsFile = pd.read_csv('metrics.csv')
+        rowNum = 0
+        for name in metricsFile['Company Name']:
+            if name == company_name:
+                data.append(metricsFile['Gross Profit (Loss)'][rowNum])
+            rowNum += 1
+
+
+    print(corpus)
+    keys = sorted(corpus)
+    list_values = []
+    for key in keys:
+        list_values.append(corpus[key])
+    print(list_values)
+    vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
+    counts = vectorizer.fit_transform(list_values)
+
+    # #metrics
+    # company_name = filename.split('.')[0]
+    #
+    # metricsFile = pd.read_csv('metrics.csv')
+    # rowNum = 0
+    # for name in metricsFile['Company Name']:
+    #     if name == company_name:
+    #         data.append(metricsFile['Gross Profit (Loss)'][rowNum])
+    #     rowNum += 1
+    return counts, data
+
 
 def extract_metrics(company_name, metrics):
     data = []
@@ -75,10 +88,11 @@ def RandomForestModel(X, y):
             pred.append(1)
     print(clf.predict([pred]))
 
-
-counts = get_counts_and_metrics('C:/Users/Chaitu Konjeti/Glassdoor/REVIEWS/')
-y = extract_metrics('AMERICAN AIRLINES GROUP INC', 'metrics.csv')
-counts, y = np.asarray(counts), np.asarray(y)
+counts, y = get_counts_and_metrics('C:/Users/Chaitu Konjeti/socweb-glassdoor-project/REVIEWS/')
+#print(counts)
+#y = extract_metrics('AMERICAN AIRLINES GROUP INC', 'metrics.csv')
+y = np.asarray(y)
+#print(counts)
 print(counts.shape)
 print(y.shape)
 RandomForestModel(counts, y)
