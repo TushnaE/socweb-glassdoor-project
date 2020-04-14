@@ -11,7 +11,6 @@ import pandas as pd
 Separates the posts contained in the provided file by year and then returns a list containing all the counts
 '''
 
-
 def get_counts_and_metrics(dir):
     data = []
     list_of_posts = []
@@ -45,10 +44,12 @@ def get_counts_and_metrics(dir):
             if key in metric_years:
                 list_of_posts.append(corpus[key])
 
+    #creates count vectorizer for posts
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
     counts = vectorizer.fit_transform(list_of_posts)
 
     data = np.asarray(data)
+
     return counts, data
 
 
