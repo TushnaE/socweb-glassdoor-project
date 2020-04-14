@@ -14,7 +14,7 @@ Separates the posts contained in the provided file by year and then returns a li
 
 def get_counts_and_metrics(dir):
     data = []
-    list_values = []
+    list_of_posts = []
 
     #iterate through all files in the directory
     for filename in os.listdir(dir):
@@ -36,66 +36,54 @@ def get_counts_and_metrics(dir):
         #sort the keys in order
         keys = sorted(corpus)
 
+        extracted, metric_years = extract_metrics(filename, 'metrics.csv', keys)
 
-        company_name = filename.split('.')[0]
-        metric_years = []
-        metricsFile = pd.read_csv('metrics.csv')
-
-        #get all the proper metrics from the metrics file
-        for row in metricsFile.index:
-            #print(metricsFile['Data Year - Fiscal'][row])
-            if metricsFile['Company Name'][row] == company_name and str(int(metricsFile['Data Year - Fiscal'][row])) in keys:
-                metric_years.append(str(int(metricsFile['Data Year - Fiscal'][row])))
-                #print(str(int(metricsFile['Data Year - Fiscal'][row])))
-                data.append(metricsFile['Gross Profit (Loss)'][row])
-
+        for metric in extracted:
+            data.append(metric)
         #only use the metrics from years that present in the datafile
         for key in keys:
             if key in metric_years:
-                list_values.append(corpus[key])
+                list_of_posts.append(corpus[key])
 
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
-    counts = vectorizer.fit_transform(list_values).toarray()
+    counts = vectorizer.fit_transform(list_of_posts)
     return counts, data
 
 
-def extract_metrics(company_name, metrics):
+def extract_metrics(filename, metrics, years):
     data = []
-    metricsFile = pd.read_csv(metrics)
-    rowNum = 0
-    for name in metricsFile['Company Name']:
-        if name == company_name:
-            data.append(metricsFile['Gross Profit (Loss)'][rowNum])
-        rowNum += 1
-    return data
+    company_name = filename.split('.')[0]
+    metric_years = []
+    metrics_file = pd.read_csv('metrics.csv')
 
-### NEED TO DO:
-### Write code that gets the performance measures from the metrics excel sheet
-### The performance measures we are using are: Revenue, Net Income, Gross Profit, and Sales
+    # get all the proper metrics from the metrics file
+    for row in metrics_file.index:
+        # print(metricsFile['Data Year - Fiscal'][row])
+        if metrics_file['Company Name'][row] == company_name and str(
+                int(metrics_file['Data Year - Fiscal'][row])) in years:
+            metric_years.append(str(int(metrics_file['Data Year - Fiscal'][row])))
+            # print(str(int(metricsFile['Data Year - Fiscal'][row])))
+            data.append(metrics_file['Gross Profit (Loss)'][row])
+    return data, metric_years
+
 
 
 '''
 Random Forest Classifier for the glassdoor posts
 '''
 
-
 def RandomForestModel(X, y):
     clf = RandomForestClassifier(max_depth=5)
-    clf = LinearRegression()
     clf.fit(X, y)
     pred = []
-    for i in range(1456):
+    for i in range(1446):
         if i % 2 == 0:
             pred.append(1)
         else:
             pred.append(1)
     print(clf.predict([pred]))
 
-counts, y = get_counts_and_metrics('C:/Users/Chaitu Konjeti/socweb-glassdoor-project/REVIEWS/')
-#print(counts)
-#y = extract_metrics('AMERICAN AIRLINES GROUP INC', 'metrics.csv')
-y = np.asarray(y)
-#print(counts)
-print(counts.shape)
-print(y.shape)
-RandomForestModel(counts, y)
+def main():
+    counts, y = get_counts_and_metrics('C:/Users/Chaitu Konjeti/socweb-glassdoor-project/REVIEWS/')
+    y = np.asarray(y)
+    RandomForestModel(counts, y)
