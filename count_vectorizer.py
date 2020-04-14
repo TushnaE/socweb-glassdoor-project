@@ -15,33 +15,47 @@ Separates the posts contained in the provided file by year and then returns a li
 def get_counts_and_metrics(dir):
     data = []
     list_values = []
+
+    #iterate through all files in the directory
     for filename in os.listdir(dir):
         print(filename)
         df = pd.read_csv(dir + filename, header=0)
+
+        #get dates and pros columns from data file
         dates = df['date']
         pros = df['pros']
+
+        #get the list of years for all the posts in the file and create a dictionary with years as the keys
         years = [date.split(' ')[3] for date in dates]
         corpus = {key: '' for key in set(years)}
+
+        #add the post to the proper year in the dictionary
         for date, pro in zip(years, pros):
             corpus[date] += pro + ' '
 
+        #sort the keys in order
         keys = sorted(corpus)
+
 
         company_name = filename.split('.')[0]
         metric_years = []
         metricsFile = pd.read_csv('metrics.csv')
+
+        #get all the proper metrics from the metrics file
         for row in metricsFile.index:
             #print(metricsFile['Data Year - Fiscal'][row])
             if metricsFile['Company Name'][row] == company_name and str(int(metricsFile['Data Year - Fiscal'][row])) in keys:
                 metric_years.append(str(int(metricsFile['Data Year - Fiscal'][row])))
                 #print(str(int(metricsFile['Data Year - Fiscal'][row])))
                 data.append(metricsFile['Gross Profit (Loss)'][row])
+
+        #only use the metrics from years that present in the datafile
         for key in keys:
             if key in metric_years:
                 list_values.append(corpus[key])
 
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
-    counts = vectorizer.fit_transform(list_values)
+    counts = vectorizer.fit_transform(list_values).toarray()
     return counts, data
 
 
