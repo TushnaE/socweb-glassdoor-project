@@ -47,6 +47,8 @@ def get_counts_and_metrics(dir):
 
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
     counts = vectorizer.fit_transform(list_of_posts)
+
+    data = np.asarray(data)
     return counts, data
 
 
@@ -84,6 +86,7 @@ def RandomForestModel(X, y):
     print(clf.predict([pred]))
 
 def main():
-    counts, y = get_counts_and_metrics('C:/Users/Chaitu Konjeti/socweb-glassdoor-project/REVIEWS/')
-    y = np.asarray(y)
-    RandomForestModel(counts, y)
+    X, y = get_counts_and_metrics('C:/Users/Chaitu Konjeti/socweb-glassdoor-project/REVIEWS/')
+    RandomForestModel(X, y)
+
+main()
