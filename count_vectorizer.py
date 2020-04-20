@@ -43,7 +43,6 @@ def get_counts_and_metrics(dir):
         for key in keys:
             if key in metric_years:
                 list_of_posts.append(corpus[key])
-
     #creates count vectorizer for posts
     vectorizer = CountVectorizer(analyzer='word', ngram_range=(1, 3))
     counts = vectorizer.fit_transform(list_of_posts)
@@ -79,7 +78,7 @@ def RandomForestModel(X, y):
     clf = RandomForestClassifier(max_depth=5)
     clf.fit(X, y)
     pred = []
-    for i in range(1446):
+    for i in range(8166):
         if i % 2 == 0:
             pred.append(1)
         else:
